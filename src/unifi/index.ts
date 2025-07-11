@@ -6,7 +6,7 @@ import { config } from '../utils/config';
 
 export const standaloneUnifiModule: UnifiApiService = {
   login: async (unifiApiClient: AxiosInstance): Promise<AxiosResponse> => {
-    const loginResponse = await unifiApiClient.post('/api/login', {
+    const loginResponse = await unifiApiClient.post('/api/auth/login', {
       username: config.unifiUsername,
       password: config.unifiPassword,
     });
