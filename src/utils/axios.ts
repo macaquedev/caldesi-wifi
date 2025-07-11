@@ -14,6 +14,7 @@ export const createAxiosInstance = () => {
       cookies: { jar },
       rejectUnauthorized: false,
     }),
+    timeout: 10000,
   });
 
   // Request interceptor
@@ -30,7 +31,7 @@ export const createAxiosInstance = () => {
     },
     (error) => {
       logger.error(`Request Error: ${error.message}`);
-      return Promise.reject();
+      return Promise.reject(error);
     },
   );
 
@@ -42,6 +43,14 @@ export const createAxiosInstance = () => {
       );
       logger.debug(`Response Headers: ${JSON.stringify(response.headers)}`);
       logger.debug(`Response Data: ${JSON.stringify(response.data)}`);
+
+      // Handle CSRF token for subsequent requests
+      const csrfToken = response.headers['x-csrf-token'];
+      if (csrfToken) {
+        instance.defaults.headers.common['x-csrf-token'] = csrfToken;
+        logger.debug('CSRF token updated for future requests');
+      }
+
       return response;
     },
     (error) => {
@@ -55,7 +64,7 @@ export const createAxiosInstance = () => {
       } else {
         logger.error(`Error: ${error.message}`);
       }
-      return Promise.reject();
+      return Promise.reject(error);
     },
   );
 

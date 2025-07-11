@@ -6,12 +6,16 @@ import { config } from '../utils/config';
 
 export const standaloneUnifiModule: UnifiApiService = {
   login: async (unifiApiClient: AxiosInstance): Promise<AxiosResponse> => {
-    const loginResponse = await unifiApiClient.post('/api/auth/login', {
+    // Detect if this is a UDMP (port 8443) or regular controller
+    const isUdmp = config.unifiControllerUrl?.includes(':8443');
+    const loginEndpoint = `/api/${isUdmp ? 'auth/' : ''}login`;
+
+    const loginResponse = await unifiApiClient.post(loginEndpoint, {
       username: config.unifiUsername,
       password: config.unifiPassword,
     });
 
-    if (loginResponse.data.meta.rc === 'ok') {
+    if (loginResponse.status === 200) {
       logger.debug('Unifi Login Successful');
       return loginResponse;
     } else {
@@ -22,15 +26,21 @@ export const standaloneUnifiModule: UnifiApiService = {
     unifiApiClient: AxiosInstance,
     req: any,
   ): Promise<AxiosResponse> => {
+    // Detect if this is a UDMP (not port 8443) or regular controller
+    const isUdmp = !config.unifiControllerUrl?.includes(':8443');
+    const baseUrl = isUdmp ? '/proxy/network' : '';
+
     const authorizeResponse = await unifiApiClient.post(
-      `/api/s/${config.unifiSiteIdentifier}/cmd/stamgr`,
-      JSON.stringify({
+      `${baseUrl}/api/s/${config.unifiSiteIdentifier}/cmd/stamgr`,
+      {
         cmd: 'authorize-guest',
         mac: req.session.macAddr,
         ap_mac: req.session.accessPoint,
-      }),
+        minutes: 120, // Default session time
+      },
     );
-    if (authorizeResponse.data.meta.rc === 'ok') {
+
+    if (authorizeResponse.status === 200) {
       logger.debug('Unifi Device Authorisation Successful');
       return authorizeResponse;
     } else {
