@@ -38,8 +38,32 @@ export const standaloneUnifiModule: UnifiApiService = {
 
     console.log(`LOGIN RESPONSE STATUS: ${res.status}`);
 
+    // Get the response body to see what UniFi is actually returning
+    const responseText = await res.text();
+    console.log(`LOGIN RESPONSE BODY: ${responseText}`);
+
+    let responseData;
+    try {
+      responseData = JSON.parse(responseText);
+      console.log(
+        `LOGIN RESPONSE JSON:`,
+        JSON.stringify(responseData, null, 2),
+      );
+    } catch (e) {
+      console.log(`LOGIN RESPONSE NOT JSON: ${responseText}`);
+      responseData = responseText;
+    }
+
     if (res.status !== 200) {
-      throw new Error(`UniFi login failed (${res.status})`);
+      throw new Error(`UniFi login failed (${res.status}): ${responseText}`);
+    }
+
+    // Check if the response indicates success (your working code checks this)
+    if (responseData && responseData.meta && responseData.meta.rc !== 'ok') {
+      console.log(`LOGIN META RC: ${responseData.meta.rc}`);
+      throw new Error(
+        `UniFi login failed: ${responseData.meta.msg || 'Authentication rejected'}`,
+      );
     }
 
     // Extract cookies like your working code
@@ -54,7 +78,7 @@ export const standaloneUnifiModule: UnifiApiService = {
       status: res.status,
       statusText: res.statusText,
       headers: Object.fromEntries(res.headers.entries()),
-      data: await res.json(),
+      data: responseData,
       config: {} as any,
     } as AxiosResponse;
   },
@@ -103,6 +127,22 @@ export const standaloneUnifiModule: UnifiApiService = {
 
     console.log(`AUTHORIZE RESPONSE STATUS: ${res.status}`);
 
+    // Get the response body to see what UniFi is actually returning
+    const responseText = await res.text();
+    console.log(`AUTHORIZE RESPONSE BODY: ${responseText}`);
+
+    let responseData;
+    try {
+      responseData = JSON.parse(responseText);
+      console.log(
+        `AUTHORIZE RESPONSE JSON:`,
+        JSON.stringify(responseData, null, 2),
+      );
+    } catch (e) {
+      console.log(`AUTHORIZE RESPONSE NOT JSON: ${responseText}`);
+      responseData = responseText;
+    }
+
     if (res.status === 401) {
       // Reset cookies and retry like your working code
       console.log('Got 401, clearing cookies for retry');
@@ -112,7 +152,17 @@ export const standaloneUnifiModule: UnifiApiService = {
     }
 
     if (res.status !== 200) {
-      throw new Error(`UniFi authorize failed (${res.status})`);
+      throw new Error(
+        `UniFi authorize failed (${res.status}): ${responseText}`,
+      );
+    }
+
+    // Check if the response indicates success
+    if (responseData && responseData.meta && responseData.meta.rc !== 'ok') {
+      console.log(`AUTHORIZE META RC: ${responseData.meta.rc}`);
+      throw new Error(
+        `UniFi authorize failed: ${responseData.meta.msg || 'Authorization rejected'}`,
+      );
     }
 
     // Return a mock AxiosResponse to satisfy the interface
@@ -120,7 +170,7 @@ export const standaloneUnifiModule: UnifiApiService = {
       status: res.status,
       statusText: res.statusText,
       headers: Object.fromEntries(res.headers.entries()),
-      data: await res.json(),
+      data: responseData,
       config: {} as any,
     } as AxiosResponse;
   },
