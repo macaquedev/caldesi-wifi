@@ -59,6 +59,16 @@ const config: Config = {
   port: process.env.PORT || '4545',
 };
 
+// Log the configuration (with sensitive data masked) for debugging
+console.log('===== UNIFI CONFIGURATION =====');
+console.log('UNIFI_USER:', config.unifiUsername ? '***SET***' : 'NOT SET');
+console.log('UNIFI_PASS:', config.unifiPassword ? '***SET***' : 'NOT SET');
+console.log('UNIFI_CONTROLLER_URL:', config.unifiControllerUrl);
+console.log('UNIFI_CONTROLLER_TYPE:', config.unifiControllerType);
+console.log('UNIFI_SITE_IDENTIFIER:', config.unifiSiteIdentifier);
+console.log('AUTH:', config.auth);
+console.log('==============================');
+
 function checkForRequiredEnvVars(): void {
   // Check for required env vars
   requiredEnvVars.forEach((envVar) => {

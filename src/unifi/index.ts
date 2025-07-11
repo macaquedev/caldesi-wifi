@@ -10,15 +10,25 @@ export const standaloneUnifiModule: UnifiApiService = {
     const isUdmp = config.unifiControllerUrl?.includes(':8443');
     const loginEndpoint = `/api/${isUdmp ? 'auth/' : ''}login`;
 
+    console.log('===== UNIFI LOGIN CONFIGURATION =====');
+    console.log(`CONTROLLER URL: ${config.unifiControllerUrl}`);
+    console.log(`IS UDMP (has :8443): ${isUdmp}`);
+    console.log(`LOGIN ENDPOINT: ${loginEndpoint}`);
+    console.log(`USERNAME: ${config.unifiUsername ? '***SET***' : 'NOT SET'}`);
+    console.log(`PASSWORD: ${config.unifiPassword ? '***SET***' : 'NOT SET'}`);
+    console.log('=====================================');
+
     const loginResponse = await unifiApiClient.post(loginEndpoint, {
       username: config.unifiUsername,
       password: config.unifiPassword,
     });
 
     if (loginResponse.status === 200) {
+      console.log('✅ UNIFI LOGIN SUCCESSFUL');
       logger.debug('Unifi Login Successful');
       return loginResponse;
     } else {
+      console.log(`❌ UNIFI LOGIN FAILED - Status: ${loginResponse.status}`);
       throw new Error('Unifi Login Failed: Incorrect Response');
     }
   },

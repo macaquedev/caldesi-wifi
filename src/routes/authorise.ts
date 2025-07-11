@@ -17,11 +17,19 @@ const unifiAuthServices: Record<UnifiControllerType, UnifiApiService> = {
 const selectedModules = unifiAuthServices[config.unifiControllerType];
 
 authoriseRouter.route('/').post(async (req: Request, res: Response) => {
+  console.log('===== AUTHORIZE ROUTE CALLED =====');
+  console.log('REQUEST BODY:', JSON.stringify(req.body, null, 2));
+  console.log('SESSION DATA:', JSON.stringify(req.session, null, 2));
+  console.log('SELECTED CONTROLLER TYPE:', config.unifiControllerType);
+  console.log('SELECTED MODULE:', selectedModules ? 'LOADED' : 'NOT LOADED');
+  console.log('==================================');
+
   const maxRetries = 2;
   let attempt = 0;
 
   while (attempt < maxRetries) {
     try {
+      console.log(`\n🔄 ATTEMPT ${attempt + 1}/${maxRetries}`);
       const unifiApiClient = createAxiosInstance();
       logger.debug(
         `Starting Unifi Login Attempt (attempt ${attempt + 1}/${maxRetries})`,
