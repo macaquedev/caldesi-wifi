@@ -1,5 +1,9 @@
 // Disable TLS certificate verification for self-signed certificates
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+console.log(
+  '🔒 TLS certificate verification disabled:',
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED,
+);
 
 // Import config from .env - Don't override existing env vars - this needs to happen first
 import * as dotenv from 'dotenv';

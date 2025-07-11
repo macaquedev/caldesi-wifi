@@ -7,12 +7,23 @@ import { config } from './config';
 export const createAxiosInstance = () => {
   const jar = new CookieJar();
 
+  // Explicitly disable TLS verification - your working code has this
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+  console.log(
+    '🔒 TLS REJECT UNAUTHORIZED set to:',
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED,
+  );
+
   const instance = axios.create({
     baseURL: config.unifiControllerUrl,
-    httpAgent: new HttpCookieAgent({ cookies: { jar } }),
+    httpAgent: new HttpCookieAgent({
+      cookies: { jar },
+    }),
     httpsAgent: new HttpsCookieAgent({
       cookies: { jar },
       rejectUnauthorized: false,
+      // Additional TLS options to ensure self-signed certs work
+      secureOptions: 0,
     }),
     timeout: 10000,
     headers: {
