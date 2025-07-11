@@ -15,6 +15,9 @@ export const createAxiosInstance = () => {
       rejectUnauthorized: false,
     }),
     timeout: 10000,
+    headers: {
+      'Content-Type': 'application/json',
+    },
   });
 
   // Request interceptor
